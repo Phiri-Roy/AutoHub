@@ -1,0 +1,120 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'screens/feed/feed_screen.dart';
+import 'screens/events/events_screen.dart';
+import 'screens/leaderboard/leaderboard_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/notifications/notifications_screen.dart';
+import '../providers/app_providers.dart';
+
+class MainNavigation extends ConsumerStatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  ConsumerState<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends ConsumerState<MainNavigation> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const FeedScreen(),
+    const EventsScreen(),
+    const LeaderboardScreen(),
+    const NotificationsScreen(),
+    const ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
+        type: BottomNavigationBarType.fixed,
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Feed',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.event_outlined),
+            activeIcon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events_outlined),
+            activeIcon: Icon(Icons.emoji_events),
+            label: 'Leaderboard',
+          ),
+          BottomNavigationBarItem(
+            icon: _buildNotificationIcon(),
+            activeIcon: _buildNotificationIcon(isActive: true),
+            label: 'Notifications',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person_outlined),
+            activeIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationIcon({bool isActive = false}) {
+    final currentUser = ref.watch(currentUserProvider).value;
+
+    if (currentUser == null) {
+      return Icon(
+        isActive ? Icons.notifications : Icons.notifications_outlined,
+      );
+    }
+
+    return StreamBuilder<int>(
+      stream: Stream.periodic(const Duration(seconds: 30)).asyncMap((_) async {
+        return await ref
+            .read(firestoreServiceProvider)
+            .getUnreadNotificationCount(currentUser.id);
+      }),
+      builder: (context, snapshot) {
+        final unreadCount = snapshot.data ?? 0;
+
+        return Stack(
+          children: [
+            Icon(isActive ? Icons.notifications : Icons.notifications_outlined),
+            if (unreadCount > 0)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
