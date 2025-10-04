@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum NotificationType { follow, like, post, comment }
+enum NotificationType { follow, like, post, comment, eventJoin, eventLeave }
 
 class NotificationModel {
   final String id;
@@ -12,6 +12,8 @@ class NotificationModel {
   final String message;
   final String? postId;
   final String? postContent;
+  final String? eventId;
+  final String? eventTitle;
   final bool isRead;
   final DateTime createdAt;
 
@@ -25,6 +27,8 @@ class NotificationModel {
     required this.message,
     this.postId,
     this.postContent,
+    this.eventId,
+    this.eventTitle,
     required this.isRead,
     required this.createdAt,
   });
@@ -44,6 +48,8 @@ class NotificationModel {
       message: data['message'] ?? '',
       postId: data['postId'],
       postContent: data['postContent'],
+      eventId: data['eventId'],
+      eventTitle: data['eventTitle'],
       isRead: data['isRead'] ?? false,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
@@ -59,6 +65,8 @@ class NotificationModel {
       'message': message,
       'postId': postId,
       'postContent': postContent,
+      'eventId': eventId,
+      'eventTitle': eventTitle,
       'isRead': isRead,
       'createdAt': Timestamp.fromDate(createdAt),
     };
@@ -74,6 +82,8 @@ class NotificationModel {
     String? message,
     String? postId,
     String? postContent,
+    String? eventId,
+    String? eventTitle,
     bool? isRead,
     DateTime? createdAt,
   }) {
@@ -88,6 +98,8 @@ class NotificationModel {
       message: message ?? this.message,
       postId: postId ?? this.postId,
       postContent: postContent ?? this.postContent,
+      eventId: eventId ?? this.eventId,
+      eventTitle: eventTitle ?? this.eventTitle,
       isRead: isRead ?? this.isRead,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -103,6 +115,10 @@ class NotificationModel {
         return 'Made a new post';
       case NotificationType.comment:
         return 'Commented on your post';
+      case NotificationType.eventJoin:
+        return 'Joined your event';
+      case NotificationType.eventLeave:
+        return 'Left your event';
     }
   }
 
@@ -116,6 +132,10 @@ class NotificationModel {
         return 'post_add';
       case NotificationType.comment:
         return 'comment';
+      case NotificationType.eventJoin:
+        return 'event_available';
+      case NotificationType.eventLeave:
+        return 'event_busy';
     }
   }
 }

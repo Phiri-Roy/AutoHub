@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/app_providers.dart';
 import '../../widgets/post_card.dart';
+import '../../widgets/stories_section.dart';
 import 'create_post_screen.dart';
 
 class FeedScreen extends ConsumerWidget {
@@ -9,11 +10,46 @@ class FeedScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider).value;
-    final postsAsync = currentUser != null
-        ? ref.watch(followingPostsProvider(currentUser.id))
-        : ref.watch(postsProvider);
+    final currentUserAsync = ref.watch(currentUserProvider);
 
+    return currentUserAsync.when(
+      data: (currentUser) {
+        final postsAsync = currentUser != null
+            ? ref.watch(followingPostsProvider(currentUser.id))
+            : ref.watch(postsProvider);
+
+        return _buildFeedContent(context, ref, postsAsync);
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('AutoHub Feed')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(title: const Text('AutoHub Feed')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error: ${error.toString()}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(currentUserProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeedContent(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue postsAsync,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AutoHub Feed'),
@@ -57,13 +93,23 @@ class FeedScreen extends ConsumerWidget {
             onRefresh: () async {
               ref.invalidate(postsProvider);
             },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                final post = posts[index];
-                return PostCard(post: post);
-              },
+            child: Column(
+              children: [
+                // Stories section
+                const StoriesSection(),
+
+                // Posts section
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      final post = posts[index];
+                      return PostCard(post: post);
+                    },
+                  ),
+                ),
+              ],
             ),
           );
         },

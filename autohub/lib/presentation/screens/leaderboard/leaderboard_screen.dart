@@ -8,90 +8,103 @@ class LeaderboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leaderboardAsync = ref.watch(leaderboardProvider);
+    final currentUserAsync = ref.watch(currentUserProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leaderboard'),
-        centerTitle: true,
-      ),
-      body: leaderboardAsync.when(
-        data: (users) {
-          if (users.isEmpty) {
-            return const Center(
+    return currentUserAsync.when(
+      data: (currentUser) {
+        final leaderboardAsync = ref.watch(leaderboardProvider);
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Leaderboard'), centerTitle: true),
+          body: leaderboardAsync.when(
+            data: (users) {
+              if (users.isEmpty) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.emoji_events_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'No winners yet',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Participate in events to climb the leaderboard!',
+                        style: TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(leaderboardProvider);
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    final rank = index + 1;
+                    return _buildLeaderboardItem(context, user, rank);
+                  },
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.emoji_events_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
                   Text(
-                    'No winners yet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    'Error loading leaderboard',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Participate in events to climb the leaderboard!',
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
+                    error.toString(),
                     textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.invalidate(leaderboardProvider);
+                    },
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(leaderboardProvider);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                final rank = index + 1;
-                
-                return _buildLeaderboardItem(context, user, rank);
-              },
             ),
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, stack) => Center(
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Leaderboard')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(title: const Text('Leaderboard')),
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text(
-                'Error loading leaderboard',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text('Error: ${error.toString()}'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  ref.invalidate(leaderboardProvider);
-                },
+                onPressed: () => ref.invalidate(currentUserProvider),
                 child: const Text('Retry'),
               ),
             ],
@@ -104,7 +117,7 @@ class LeaderboardScreen extends ConsumerWidget {
   Widget _buildLeaderboardItem(BuildContext context, user, int rank) {
     Color rankColor;
     IconData rankIcon;
-    
+
     switch (rank) {
       case 1:
         rankColor = Colors.amber;
@@ -135,11 +148,7 @@ class LeaderboardScreen extends ConsumerWidget {
           ),
           child: Center(
             child: rank <= 3
-                ? Icon(
-                    rankIcon,
-                    color: rankColor,
-                    size: 24,
-                  )
+                ? Icon(rankIcon, color: rankColor, size: 24)
                 : Text(
                     '$rank',
                     style: TextStyle(
@@ -161,13 +170,17 @@ class LeaderboardScreen extends ConsumerWidget {
         trailing: user.profilePhotoUrl != null
             ? CircleAvatar(
                 radius: 20,
-                backgroundImage: CachedNetworkImageProvider(user.profilePhotoUrl!),
+                backgroundImage: CachedNetworkImageProvider(
+                  user.profilePhotoUrl!,
+                ),
               )
             : CircleAvatar(
                 radius: 20,
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 child: Text(
-                  user.username.isNotEmpty ? user.username[0].toUpperCase() : 'U',
+                  user.username.isNotEmpty
+                      ? user.username[0].toUpperCase()
+                      : 'U',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

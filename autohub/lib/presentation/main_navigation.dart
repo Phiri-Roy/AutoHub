@@ -67,19 +67,31 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
   }
 
   Widget _buildNotificationIcon({bool isActive = false}) {
-    final currentUser = ref.watch(currentUserProvider).value;
+    final currentUserAsync = ref.watch(currentUserProvider);
 
-    if (currentUser == null) {
-      return Icon(
-        isActive ? Icons.notifications : Icons.notifications_outlined,
-      );
-    }
+    return currentUserAsync.when(
+      data: (currentUser) {
+        if (currentUser == null) {
+          return Icon(
+            isActive ? Icons.notifications : Icons.notifications_outlined,
+          );
+        }
 
+        return _buildNotificationIconWithCount(isActive, currentUser.id);
+      },
+      loading: () =>
+          Icon(isActive ? Icons.notifications : Icons.notifications_outlined),
+      error: (error, stack) =>
+          Icon(isActive ? Icons.notifications : Icons.notifications_outlined),
+    );
+  }
+
+  Widget _buildNotificationIconWithCount(bool isActive, String userId) {
     return StreamBuilder<int>(
       stream: Stream.periodic(const Duration(seconds: 30)).asyncMap((_) async {
         return await ref
             .read(firestoreServiceProvider)
-            .getUnreadNotificationCount(currentUser.id);
+            .getUnreadNotificationCount(userId);
       }),
       builder: (context, snapshot) {
         final unreadCount = snapshot.data ?? 0;

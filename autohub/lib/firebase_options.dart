@@ -51,8 +51,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-android-api-key',
-    appId: '1:781860708104:android:your-android-app-id',
+    apiKey: 'AIzaSyC-BsVnG8o8QTywppfwlotX67Mut4ipMSw',
+    appId: '1:781860708104:android:8323bdc10d8a52710f56bd',
     messagingSenderId: '781860708104',
     projectId: 'autohub-819f4',
     storageBucket: 'autohub-819f4.firebasestorage.app',

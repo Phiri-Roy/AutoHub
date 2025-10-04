@@ -19,10 +19,15 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return authService.authStateChanges;
 });
 
-// Current user provider
-final currentUserProvider = FutureProvider<UserModel?>((ref) async {
+// Current user provider - now reacts to auth state changes
+final currentUserProvider = StreamProvider<UserModel?>((ref) {
   final authService = ref.watch(authServiceProvider);
-  return await authService.getCurrentUserData();
+  return authService.authStateChanges.asyncMap((user) async {
+    if (user != null) {
+      return await authService.getCurrentUserData();
+    }
+    return null;
+  });
 });
 
 // User profile provider
@@ -61,21 +66,54 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
 }
 
-// Events provider
+// Events provider - now reacts to auth state changes
 final eventsProvider = StreamProvider<List<EventModel>>((ref) {
+  final currentUserAsync = ref.watch(currentUserProvider);
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.getEventsStream();
+
+  return currentUserAsync.when(
+    data: (currentUser) {
+      if (currentUser == null) {
+        return Stream.value(<EventModel>[]);
+      }
+      return firestoreService.getEventsStream();
+    },
+    loading: () => Stream.value(<EventModel>[]),
+    error: (error, stack) => Stream.error(error),
+  );
 });
 
 final upcomingEventsProvider = StreamProvider<List<EventModel>>((ref) {
+  final currentUserAsync = ref.watch(currentUserProvider);
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.getUpcomingEventsStream();
+
+  return currentUserAsync.when(
+    data: (currentUser) {
+      if (currentUser == null) {
+        return Stream.value(<EventModel>[]);
+      }
+      return firestoreService.getUpcomingEventsStream();
+    },
+    loading: () => Stream.value(<EventModel>[]),
+    error: (error, stack) => Stream.error(error),
+  );
 });
 
-// Posts provider
+// Posts provider - now reacts to auth state changes
 final postsProvider = StreamProvider<List<PostModel>>((ref) {
+  final currentUserAsync = ref.watch(currentUserProvider);
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.getPostsStream();
+
+  return currentUserAsync.when(
+    data: (currentUser) {
+      if (currentUser == null) {
+        return Stream.value(<PostModel>[]);
+      }
+      return firestoreService.getPostsStream();
+    },
+    loading: () => Stream.value(<PostModel>[]),
+    error: (error, stack) => Stream.error(error),
+  );
 });
 
 // Following posts provider
@@ -94,10 +132,21 @@ final eventSubmissionsProvider =
       return firestoreService.getEventSubmissions(eventId);
     });
 
-// Leaderboard provider
+// Leaderboard provider - now reacts to auth state changes
 final leaderboardProvider = StreamProvider<List<UserModel>>((ref) {
+  final currentUserAsync = ref.watch(currentUserProvider);
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.getLeaderboardStream();
+
+  return currentUserAsync.when(
+    data: (currentUser) {
+      if (currentUser == null) {
+        return Stream.value(<UserModel>[]);
+      }
+      return firestoreService.getLeaderboardStream();
+    },
+    loading: () => Stream.value(<UserModel>[]),
+    error: (error, stack) => Stream.error(error),
+  );
 });
 
 // User by ID provider

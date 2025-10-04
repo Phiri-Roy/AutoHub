@@ -234,7 +234,7 @@ class _UserTileState extends ConsumerState<_UserTile> {
                 onPressed: _toggleFollow,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _isFollowing
-                      ? Theme.of(context).colorScheme.surfaceVariant
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
                       : Theme.of(context).colorScheme.primary,
                   foregroundColor: _isFollowing
                       ? Theme.of(context).colorScheme.onSurfaceVariant

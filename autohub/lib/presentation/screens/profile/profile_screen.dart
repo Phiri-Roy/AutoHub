@@ -332,7 +332,24 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.of(context).pop();
               try {
+                // Clear all providers and state
+                ref.invalidate(currentUserProvider);
+                ref.invalidate(postsProvider);
+                ref.invalidate(eventsProvider);
+                ref.invalidate(upcomingEventsProvider);
+                ref.invalidate(leaderboardProvider);
+
+                // Sign out
                 await ref.read(authServiceProvider).signOut();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Logged out successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -105,21 +105,81 @@ class FirestoreService {
   }
 
   Future<void> joinEvent(String eventId, String userId) async {
-    await _firestore
+    // Get event details and user details for notification
+    final eventDoc = await _firestore
         .collection(AppConstants.eventsCollection)
         .doc(eventId)
-        .update({
-          'attendees': FieldValue.arrayUnion([userId]),
-        });
+        .get();
+
+    final userDoc = await _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .get();
+
+    if (eventDoc.exists && userDoc.exists) {
+      final eventData = eventDoc.data()!;
+      final userData = userDoc.data()!;
+
+      // Update attendees
+      await _firestore
+          .collection(AppConstants.eventsCollection)
+          .doc(eventId)
+          .update({
+            'attendees': FieldValue.arrayUnion([userId]),
+          });
+
+      // Send notification to event owner (only if not joining own event)
+      final eventOwnerId = eventData['createdBy'] as String;
+      if (eventOwnerId != userId) {
+        await createEventJoinNotification(
+          userId,
+          eventOwnerId,
+          userData['username'] as String,
+          userData['profilePhotoUrl'] as String?,
+          eventId,
+          eventData['eventName'] as String,
+        );
+      }
+    }
   }
 
   Future<void> leaveEvent(String eventId, String userId) async {
-    await _firestore
+    // Get event details and user details for notification
+    final eventDoc = await _firestore
         .collection(AppConstants.eventsCollection)
         .doc(eventId)
-        .update({
-          'attendees': FieldValue.arrayRemove([userId]),
-        });
+        .get();
+
+    final userDoc = await _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .get();
+
+    if (eventDoc.exists && userDoc.exists) {
+      final eventData = eventDoc.data()!;
+      final userData = userDoc.data()!;
+
+      // Update attendees
+      await _firestore
+          .collection(AppConstants.eventsCollection)
+          .doc(eventId)
+          .update({
+            'attendees': FieldValue.arrayRemove([userId]),
+          });
+
+      // Send notification to event owner (only if not leaving own event)
+      final eventOwnerId = eventData['createdBy'] as String;
+      if (eventOwnerId != userId) {
+        await createEventLeaveNotification(
+          userId,
+          eventOwnerId,
+          userData['username'] as String,
+          userData['profilePhotoUrl'] as String?,
+          eventId,
+          eventData['eventName'] as String,
+        );
+      }
+    }
   }
 
   // Post operations
@@ -629,5 +689,54 @@ class FirestoreService {
       batch.set(notificationRef, notification.toFirestore());
     }
     await batch.commit();
+  }
+
+  // Event notification methods
+  Future<void> createEventJoinNotification(
+    String joinerId,
+    String eventOwnerId,
+    String joinerName,
+    String? joinerProfilePhotoUrl,
+    String eventId,
+    String eventTitle,
+  ) async {
+    final notification = NotificationModel(
+      id: '',
+      recipientId: eventOwnerId,
+      senderId: joinerId,
+      senderName: joinerName,
+      senderProfilePhotoUrl: joinerProfilePhotoUrl,
+      type: NotificationType.eventJoin,
+      message: '$joinerName joined your event "$eventTitle"',
+      eventId: eventId,
+      eventTitle: eventTitle,
+      isRead: false,
+      createdAt: DateTime.now(),
+    );
+    await createNotification(notification);
+  }
+
+  Future<void> createEventLeaveNotification(
+    String leaverId,
+    String eventOwnerId,
+    String leaverName,
+    String? leaverProfilePhotoUrl,
+    String eventId,
+    String eventTitle,
+  ) async {
+    final notification = NotificationModel(
+      id: '',
+      recipientId: eventOwnerId,
+      senderId: leaverId,
+      senderName: leaverName,
+      senderProfilePhotoUrl: leaverProfilePhotoUrl,
+      type: NotificationType.eventLeave,
+      message: '$leaverName left your event "$eventTitle"',
+      eventId: eventId,
+      eventTitle: eventTitle,
+      isRead: false,
+      createdAt: DateTime.now(),
+    );
+    await createNotification(notification);
   }
 }

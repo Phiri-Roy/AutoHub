@@ -7,38 +7,23 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:781860708104:android:your-android-app-id",
+        "mobilesdk_app_id": "1:781860708104:android:8323bdc10d8a52710f56bd",
         "android_client_info": {
           "package_name": "com.autohub.app.autohub"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "781860708104-your-client-id.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "your-android-api-key"
+          "current_key": "AIzaSyC-BsVnG8o8QTywppfwlotX67Mut4ipMSw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "781860708104-your-client-id.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
   ],
   "configuration_version": "1"
 }
-
-
-
-
-
