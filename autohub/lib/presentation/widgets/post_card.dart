@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/post_model.dart';
 import '../../../providers/app_providers.dart';
+import 'common/share_button.dart';
 
 class PostCard extends ConsumerWidget {
   final PostModel post;
@@ -172,16 +173,18 @@ class PostCard extends ConsumerWidget {
                 const Spacer(),
 
                 // Share button
-                IconButton(
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: () {
-                    // TODO: Implement share functionality
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Share feature coming soon!'),
-                      ),
-                    );
-                  },
+                ShareButton(
+                  shareType: ShareType.post,
+                  content: post.content,
+                  imageUrl: post.imageUrls.isNotEmpty
+                      ? post.imageUrls.first
+                      : null,
+                  authorName: postAuthor.when(
+                    data: (user) => user?.username,
+                    loading: () => null,
+                    error: (_, __) => null,
+                  ),
+                  icon: Icons.share_outlined,
                 ),
               ],
             ),

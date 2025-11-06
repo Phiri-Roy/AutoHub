@@ -6,6 +6,8 @@ import '../../../core/utils/constants.dart';
 import 'edit_profile_screen.dart';
 import 'my_garage_screen.dart';
 import 'follow_screen.dart';
+import '../debug/firebase_debug_screen.dart';
+import '../../widgets/common/theme_toggle.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -190,16 +192,25 @@ class ProfileScreen extends ConsumerWidget {
                         'App preferences and notifications',
                         Icons.settings,
                         () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Settings coming soon!'),
-                            ),
-                          );
+                          _showSettingsDialog(context);
                         },
                       ),
 
                       const SizedBox(height: 8),
 
+                      _buildProfileOption(
+                        context,
+                        'Firebase Debug',
+                        'Test Firebase configuration',
+                        Icons.bug_report,
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const FirebaseDebugScreen(),
+                            ),
+                          );
+                        },
+                      ),
                       _buildProfileOption(
                         context,
                         'Help & Support',
@@ -313,6 +324,27 @@ class ProfileScreen extends ConsumerWidget {
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: onTap,
+      ),
+    );
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Settings'),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [ThemeSelector()],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }

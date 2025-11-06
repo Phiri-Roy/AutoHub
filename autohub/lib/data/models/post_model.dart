@@ -23,7 +23,7 @@ class PostModel {
 
   factory PostModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     return PostModel(
       id: doc.id,
       content: data['content'] ?? '',
@@ -75,6 +75,34 @@ class PostModel {
   int get likeCount => likes.length;
   int get commentCount => comments.length;
   bool hasLiked(String userId) => likes.contains(userId);
+
+  factory PostModel.fromMap(Map<String, dynamic> map) {
+    return PostModel(
+      id: map['id'] ?? '',
+      content: map['content'] ?? '',
+      imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      postedBy: map['postedBy'] ?? '',
+      timestamp: DateTime.parse(map['timestamp']),
+      likes: List<String>.from(map['likes'] ?? []),
+      comments: (map['comments'] as List<dynamic>? ?? [])
+          .map((comment) => CommentModel.fromMap(comment))
+          .toList(),
+      isActive: map['isActive'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'content': content,
+      'imageUrls': imageUrls,
+      'postedBy': postedBy,
+      'timestamp': timestamp.toIso8601String(),
+      'likes': likes,
+      'comments': comments.map((comment) => comment.toMap()).toList(),
+      'isActive': isActive,
+    };
+  }
 }
 
 class CommentModel {
@@ -97,7 +125,7 @@ class CommentModel {
       id: map['id'] ?? '',
       content: map['content'] ?? '',
       postedBy: map['postedBy'] ?? '',
-      timestamp: map['timestamp'] != null 
+      timestamp: map['timestamp'] != null
           ? (map['timestamp'] as Timestamp).toDate()
           : DateTime.now(),
       likes: List<String>.from(map['likes'] ?? []),
@@ -133,4 +161,3 @@ class CommentModel {
   int get likeCount => likes.length;
   bool hasLiked(String userId) => likes.contains(userId);
 }
-

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
-import 'presentation/screens/feed/social_feed_screen.dart';
 
 void main() {
   runApp(const SimpleDemoApp());
@@ -595,11 +594,3 @@ class _SimpleSocialFeedScreenState extends State<SimpleSocialFeedScreen>
     );
   }
 }
-
-
-
-
-
-
-
-

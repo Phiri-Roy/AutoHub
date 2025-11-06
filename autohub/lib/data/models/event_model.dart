@@ -31,7 +31,7 @@ class EventModel {
 
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     return EventModel(
       id: doc.id,
       eventName: data['eventName'] ?? '',
@@ -97,5 +97,38 @@ class EventModel {
   bool get isUpcoming => eventDate.isAfter(DateTime.now());
   bool get isPast => eventDate.isBefore(DateTime.now());
   int get attendeeCount => attendees.length;
-}
 
+  factory EventModel.fromMap(Map<String, dynamic> map) {
+    return EventModel(
+      id: map['id'] ?? '',
+      eventName: map['eventName'] ?? '',
+      description: map['description'] ?? '',
+      location: map['location'] ?? '',
+      latitude: map['latitude']?.toDouble(),
+      longitude: map['longitude']?.toDouble(),
+      eventDate: DateTime.parse(map['eventDate']),
+      createdBy: map['createdBy'] ?? '',
+      createdAt: DateTime.parse(map['createdAt']),
+      attendees: List<String>.from(map['attendees'] ?? []),
+      imageUrl: map['imageUrl'],
+      isActive: map['isActive'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'eventName': eventName,
+      'description': description,
+      'location': location,
+      'latitude': latitude,
+      'longitude': longitude,
+      'eventDate': eventDate.toIso8601String(),
+      'createdBy': createdBy,
+      'createdAt': createdAt.toIso8601String(),
+      'attendees': attendees,
+      'imageUrl': imageUrl,
+      'isActive': isActive,
+    };
+  }
+}

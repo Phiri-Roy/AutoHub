@@ -5,7 +5,9 @@ import 'screens/events/events_screen.dart';
 import 'screens/leaderboard/leaderboard_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
+import 'screens/search/search_screen.dart';
 import '../providers/app_providers.dart';
+import 'widgets/common/offline_indicator.dart';
 
 class MainNavigation extends ConsumerStatefulWidget {
   const MainNavigation({super.key});
@@ -20,6 +22,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
   final List<Widget> _screens = [
     const FeedScreen(),
     const EventsScreen(),
+    const SearchScreen(),
     const LeaderboardScreen(),
     const NotificationsScreen(),
     const ProfileScreen(),
@@ -28,7 +31,15 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: Column(
+        children: [
+          const OfflineIndicator(),
+          const SyncIndicator(),
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: _screens),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -45,6 +56,11 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
             icon: Icon(Icons.event_outlined),
             activeIcon: Icon(Icons.event),
             label: 'Events',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.search_outlined),
+            activeIcon: Icon(Icons.search),
+            label: 'Search',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events_outlined),

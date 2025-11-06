@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../data/models/user_model.dart';
 import '../../../providers/app_providers.dart';
 import 'add_car_screen.dart';
+import '../../widgets/common/share_button.dart';
+import '../comparison/car_comparison_screen.dart';
 
 class MyGarageScreen extends ConsumerWidget {
   const MyGarageScreen({super.key});
@@ -17,12 +19,20 @@ class MyGarageScreen extends ConsumerWidget {
         title: const Text('My Garage'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.compare_arrows),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const AddCarScreen(),
+                  builder: (context) => const CarComparisonScreen(),
                 ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AddCarScreen()),
               );
             },
           ),
@@ -31,9 +41,7 @@ class MyGarageScreen extends ConsumerWidget {
       body: currentUser.when(
         data: (user) {
           if (user == null) {
-            return const Center(
-              child: Text('Please log in'),
-            );
+            return const Center(child: Text('Please log in'));
           }
 
           if (user.cars.isEmpty) {
@@ -93,18 +101,12 @@ class MyGarageScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'Error loading garage',
@@ -181,9 +183,9 @@ class MyGarageScreen extends ConsumerWidget {
                         ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Car details
               Expanded(
                 flex: 2,
@@ -196,9 +198,9 @@ class MyGarageScreen extends ConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     if (car.color != null) ...[
                       Text(
                         car.color!,
@@ -206,7 +208,7 @@ class MyGarageScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                     ],
-                    
+
                     if (car.modifications.isNotEmpty) ...[
                       Text(
                         '${car.modifications.length} modifications',
@@ -215,6 +217,29 @@ class MyGarageScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+
+                    const Spacer(),
+
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        CarComparisonButton(car: car),
+                        ShareButton(
+                          shareType: ShareType.car,
+                          carMake: car.make,
+                          carModel: car.model,
+                          carYear: car.year,
+                          carImageUrl: car.imageUrls.isNotEmpty
+                              ? car.imageUrls.first
+                              : null,
+                          modifications: car.modifications.isNotEmpty
+                              ? car.modifications.join(', ')
+                              : null,
+                          icon: Icons.share_outlined,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

@@ -158,6 +158,21 @@ final userByIdProvider = FutureProvider.family<UserModel?, String>((
   return await firestoreService.getUser(userId);
 });
 
+// Activity providers by user
+final userPostsProvider = StreamProvider.family<List<PostModel>, String>((
+  ref,
+  userId,
+) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getUserPosts(userId);
+});
+
+final userAttendedEventsProvider =
+    StreamProvider.family<List<EventModel>, String>((ref, userId) {
+      final firestoreService = ref.watch(firestoreServiceProvider);
+      return firestoreService.getEventsAttendedByUser(userId);
+    });
+
 // Selected event provider
 final selectedEventProvider = StateProvider<EventModel?>((ref) => null);
 

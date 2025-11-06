@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../providers/app_providers.dart';
 import '../../../../core/utils/constants.dart';
+import '../../../../data/services/sync_service.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -36,6 +37,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+      // Refresh connectivity status after successful login
+      // Since login succeeded, we know there's internet connectivity
+      ref.read(isOnlineProvider.notifier).refresh();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

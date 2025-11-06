@@ -89,6 +89,44 @@ class UserModel {
       followingCount: followingCount ?? this.followingCount,
     );
   }
+
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] ?? '',
+      email: map['email'] ?? '',
+      username: map['username'] ?? '',
+      profilePhotoUrl: map['profilePhotoUrl'],
+      bio: map['bio'],
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'])
+          : DateTime.now(),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt'])
+          : DateTime.now(),
+      cars: (map['cars'] as List<dynamic>? ?? [])
+          .map((car) => CarModel.fromMap(car))
+          .toList(),
+      totalWins: map['totalWins'] ?? 0,
+      followersCount: map['followersCount'] ?? 0,
+      followingCount: map['followingCount'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'email': email,
+      'username': username,
+      'profilePhotoUrl': profilePhotoUrl,
+      'bio': bio,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'cars': cars.map((car) => car.toMap()).toList(),
+      'totalWins': totalWins,
+      'followersCount': followersCount,
+      'followingCount': followingCount,
+    };
+  }
 }
 
 class CarModel {

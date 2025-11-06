@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/event_model.dart';
+import 'common/share_button.dart';
+import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
@@ -99,6 +101,17 @@ class EventCard extends StatelessWidget {
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  ),
+                  const Spacer(),
+                  ShareButton(
+                    shareType: ShareType.event,
+                    eventName: event.eventName,
+                    eventDate: DateFormat(
+                      'MMM d, y • h:mm a',
+                    ).format(event.eventDate),
+                    eventLocation: event.location,
+                    eventDescription: event.description,
+                    icon: Icons.share_outlined,
                   ),
                 ],
               ),

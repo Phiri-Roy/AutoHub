@@ -214,6 +214,20 @@ class FirestoreService {
         );
   }
 
+  // Posts by a specific user
+  Stream<List<PostModel>> getUserPosts(String userId) {
+    return _firestore
+        .collection(AppConstants.postsCollection)
+        .where('postedBy', isEqualTo: userId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList(),
+        );
+  }
+
   Future<void> likePost(String postId, String userId) async {
     await _firestore
         .collection(AppConstants.postsCollection)
@@ -557,6 +571,21 @@ class FirestoreService {
         });
   }
 
+  // Events attended by a specific user (based on attendees array)
+  Stream<List<EventModel>> getEventsAttendedByUser(String userId) {
+    return _firestore
+        .collection(AppConstants.eventsCollection)
+        .where('attendees', arrayContains: userId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('eventDate', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => EventModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
   // Notification operations
   Future<void> createNotification(NotificationModel notification) async {
     await _firestore
@@ -738,5 +767,61 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
     await createNotification(notification);
+  }
+
+  // Additional methods for sync service
+  Future<List<UserModel>> getAllUsers() async {
+    final snapshot = await _firestore
+        .collection(AppConstants.usersCollection)
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+  }
+
+  Future<List<EventModel>> getAllEvents() async {
+    final snapshot = await _firestore
+        .collection(AppConstants.eventsCollection)
+        .orderBy('eventDate', descending: true)
+        .get();
+
+    return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
+  }
+
+  Future<List<PostModel>> getAllPosts() async {
+    final snapshot = await _firestore
+        .collection(AppConstants.postsCollection)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    return snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
+  }
+
+  Future<void> deleteUser(String userId) async {
+    await _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .delete();
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    await _firestore
+        .collection(AppConstants.eventsCollection)
+        .doc(eventId)
+        .delete();
+  }
+
+  Future<void> updatePost(PostModel post) async {
+    await _firestore
+        .collection(AppConstants.postsCollection)
+        .doc(post.id)
+        .update(post.toFirestore());
+  }
+
+  Future<void> deletePost(String postId) async {
+    await _firestore
+        .collection(AppConstants.postsCollection)
+        .doc(postId)
+        .delete();
   }
 }

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../../../data/models/post_model.dart';
 import '../../../providers/app_providers.dart';
 import '../../../core/utils/constants.dart';
+import '../../../data/services/offline_image_service.dart';
+import '../../../data/services/offline_service.dart';
 import 'package:uuid/uuid.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
@@ -101,38 +103,69 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       final firestoreService = ref.read(firestoreServiceProvider);
       List<String> imageUrls = [];
 
-      // Upload images if any
+      // Upload images if any - with offline fallback
       if (_selectedImages.isNotEmpty) {
-        print('Uploading ${_selectedImages.length} images...');
-        setState(() => _loadingMessage = 'Uploading images...');
+        print('Processing ${_selectedImages.length} images...');
+        setState(() => _loadingMessage = 'Processing images...');
+
+        final isOnline = await OfflineService.isOnline();
 
         for (int i = 0; i < _selectedImages.length; i++) {
-          print('Uploading image ${i + 1}/${_selectedImages.length}');
+          print('Processing image ${i + 1}/${_selectedImages.length}');
           setState(
             () => _loadingMessage =
-                'Uploading image ${i + 1}/${_selectedImages.length}...',
+                'Processing image ${i + 1}/${_selectedImages.length}...',
           );
 
           try {
-            final imageUrl = await firestoreService
-                .uploadImageFromXFile(
+            String imageUrl;
+            final imageId = OfflineImageService.generateImageId(currentUser.id);
+
+            if (isOnline) {
+              // Try to upload to Firebase Storage
+              try {
+                imageUrl = await firestoreService
+                    .uploadImageFromXFile(
+                      _selectedImages[i],
+                      '${AppConstants.postImagesPath}/${currentUser.id}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
+                    )
+                    .timeout(
+                      const Duration(minutes: 2),
+                      onTimeout: () {
+                        throw Exception('Image upload timed out');
+                      },
+                    );
+                print('✅ Image ${i + 1} uploaded successfully');
+              } catch (firebaseError) {
+                print('⚠️ Firebase upload failed: $firebaseError');
+                // Fallback to offline storage
+                print('📱 Saving image locally...');
+                await OfflineImageService.saveXFileLocally(
+                  imageId,
                   _selectedImages[i],
-                  '${AppConstants.postImagesPath}/${currentUser.id}_${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
-                )
-                .timeout(
-                  const Duration(minutes: 2),
-                  onTimeout: () {
-                    throw Exception('Image upload timed out after 2 minutes');
-                  },
                 );
+                // Use a temporary local path as URL marker
+                imageUrl = 'local://$imageId';
+                print('✅ Image saved locally: $imageId');
+              }
+            } else {
+              // Save to local storage
+              print('📱 Saving image locally (offline mode)...');
+              await OfflineImageService.saveXFileLocally(
+                imageId,
+                _selectedImages[i],
+              );
+              imageUrl = 'local://$imageId';
+              print('✅ Image saved locally: $imageId');
+            }
+
             imageUrls.add(imageUrl);
-            print('Image ${i + 1} uploaded successfully: $imageUrl');
-          } catch (uploadError) {
-            print('Failed to upload image ${i + 1}: $uploadError');
-            throw Exception('Failed to upload image ${i + 1}: $uploadError');
+          } catch (error) {
+            print('❌ Failed to process image ${i + 1}: $error');
+            // Continue with other images
           }
         }
-        print('All images uploaded successfully');
+        print('All images processed');
       }
 
       // Create post

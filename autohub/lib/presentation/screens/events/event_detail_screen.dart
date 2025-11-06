@@ -7,14 +7,12 @@ import '../../../data/models/event_submission_model.dart';
 import '../../../providers/app_providers.dart';
 import '../../../core/utils/constants.dart';
 import 'submit_car_screen.dart';
+import '../chat/event_chat_screen.dart';
 
 class EventDetailScreen extends ConsumerStatefulWidget {
   final EventModel event;
 
-  const EventDetailScreen({
-    super.key,
-    required this.event,
-  });
+  const EventDetailScreen({super.key, required this.event});
 
   @override
   ConsumerState<EventDetailScreen> createState() => _EventDetailScreenState();
@@ -26,12 +24,18 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    final eventSubmissions = ref.watch(eventSubmissionsProvider(widget.event.id));
+    final eventSubmissions = ref.watch(
+      eventSubmissionsProvider(widget.event.id),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.event.eventName),
         actions: [
+          ChatButton(
+            eventId: widget.event.id,
+            eventName: widget.event.eventName,
+          ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
@@ -57,9 +61,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                 placeholder: (context, url) => Container(
                   height: 250,
                   color: Colors.grey[300],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: const Center(child: CircularProgressIndicator()),
                 ),
                 errorWidget: (context, url, error) => Container(
                   height: 250,
@@ -78,9 +80,9 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                     widget.event.eventName,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Event date and time
                   Row(
                     children: [
@@ -91,14 +93,16 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        DateFormat('EEEE, MMMM d, y • h:mm a').format(widget.event.eventDate),
+                        DateFormat(
+                          'EEEE, MMMM d, y • h:mm a',
+                        ).format(widget.event.eventDate),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Location
                   Row(
                     children: [
@@ -116,9 +120,9 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Description
                   Text(
                     'Description',
@@ -129,9 +133,9 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                     widget.event.description,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Attendees count
                   Row(
                     children: [
@@ -147,23 +151,29 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Join/Leave button
                   if (currentUser.value != null) ...[
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _isJoining ? null : () => _toggleAttendance(),
+                        onPressed: _isJoining
+                            ? null
+                            : () => _toggleAttendance(),
                         icon: _isJoining
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Icon(
-                                widget.event.attendees.contains(currentUser.value!.id)
+                                widget.event.attendees.contains(
+                                      currentUser.value!.id,
+                                    )
                                     ? Icons.exit_to_app
                                     : Icons.add,
                               ),
@@ -176,7 +186,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  
+
                   // Featured Car Showcase
                   Text(
                     'Featured Car Showcase',
@@ -186,22 +196,27 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                   Text(
                     'Vote for your favorite car!',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Submit car button
-                  if (currentUser.value != null && 
-                      widget.event.attendees.contains(currentUser.value!.id)) ...[
+                  if (currentUser.value != null &&
+                      widget.event.attendees.contains(
+                        currentUser.value!.id,
+                      )) ...[
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => SubmitCarScreen(event: widget.event),
+                              builder: (context) =>
+                                  SubmitCarScreen(event: widget.event),
                             ),
                           );
                         },
@@ -211,7 +226,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
+
                   // Event submissions
                   eventSubmissions.when(
                     data: (submissions) {
@@ -219,15 +234,15 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                         return const Card(
                           child: Padding(
                             padding: EdgeInsets.all(16),
-                            child: Center(
-                              child: Text('No cars submitted yet'),
-                            ),
+                            child: Center(child: Text('No cars submitted yet')),
                           ),
                         );
                       }
 
                       // Sort by vote count
-                      submissions.sort((a, b) => b.voteCount.compareTo(a.voteCount));
+                      submissions.sort(
+                        (a, b) => b.voteCount.compareTo(a.voteCount),
+                      );
 
                       return Column(
                         children: submissions.map((submission) {
@@ -235,7 +250,9 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 child: Text(
                                   submission.voteCount.toString(),
                                   style: const TextStyle(
@@ -249,10 +266,15 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                               trailing: currentUser.value != null
                                   ? IconButton(
                                       icon: Icon(
-                                        submission.hasVoted(currentUser.value!.id)
+                                        submission.hasVoted(
+                                              currentUser.value!.id,
+                                            )
                                             ? Icons.favorite
                                             : Icons.favorite_border,
-                                        color: submission.hasVoted(currentUser.value!.id)
+                                        color:
+                                            submission.hasVoted(
+                                              currentUser.value!.id,
+                                            )
                                             ? Colors.red
                                             : null,
                                       ),
@@ -264,9 +286,8 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                         }).toList(),
                       );
                     },
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -293,7 +314,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       if (currentUser == null) return;
 
       final firestoreService = ref.read(firestoreServiceProvider);
-      
+
       if (widget.event.attendees.contains(currentUser.id)) {
         await firestoreService.leaveEvent(widget.event.id, currentUser.id);
       } else {
@@ -321,9 +342,12 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       if (currentUser == null) return;
 
       final firestoreService = ref.read(firestoreServiceProvider);
-      
+
       if (submission.hasVoted(currentUser.id)) {
-        await firestoreService.removeVoteFromSubmission(submission.id, currentUser.id);
+        await firestoreService.removeVoteFromSubmission(
+          submission.id,
+          currentUser.id,
+        );
       } else {
         await firestoreService.voteForSubmission(submission.id, currentUser.id);
       }
@@ -339,9 +363,6 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
     }
   }
 }
-
-
-
 
 
 

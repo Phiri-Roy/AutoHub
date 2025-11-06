@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../providers/app_providers.dart';
+import '../../widgets/common/share_button.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -167,26 +168,48 @@ class LeaderboardScreen extends ConsumerWidget {
           '${user.totalWins} wins',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-        trailing: user.profilePhotoUrl != null
-            ? CircleAvatar(
-                radius: 20,
-                backgroundImage: CachedNetworkImageProvider(
-                  user.profilePhotoUrl!,
-                ),
-              )
-            : CircleAvatar(
-                radius: 20,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  user.username.isNotEmpty
-                      ? user.username[0].toUpperCase()
-                      : 'U',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ShareButton(
+              shareType: ShareType.leaderboard,
+              carMake: user.cars.isNotEmpty ? user.cars.first.make : 'Car',
+              carModel: user.cars.isNotEmpty ? user.cars.first.model : 'Model',
+              carYear: user.cars.isNotEmpty
+                  ? user.cars.first.year
+                  : DateTime.now().year,
+              leaderboardPosition: rank,
+              totalWins: user.totalWins,
+              carImageUrl: user.cars.isNotEmpty
+                  ? user.cars.first.imageUrls.isNotEmpty
+                        ? user.cars.first.imageUrls.first
+                        : null
+                  : null,
+              icon: Icons.share_outlined,
+            ),
+            const SizedBox(width: 8),
+            user.profilePhotoUrl != null
+                ? CircleAvatar(
+                    radius: 20,
+                    backgroundImage: CachedNetworkImageProvider(
+                      user.profilePhotoUrl!,
+                    ),
+                  )
+                : CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: Text(
+                      user.username.isNotEmpty
+                          ? user.username[0].toUpperCase()
+                          : 'U',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+          ],
+        ),
       ),
     );
   }

@@ -59,29 +59,29 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-ios-api-key',
-    appId: 'your-ios-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosBundleId: 'com.autohub.app',
+    apiKey: 'AIzaSyC-BsVnG8o8QTywppfwlotX67Mut4ipMSw',
+    appId: '1:781860708104:ios:8323bdc10d8a52710f56bd',
+    messagingSenderId: '781860708104',
+    projectId: 'autohub-819f4',
+    storageBucket: 'autohub-819f4.firebasestorage.app',
+    iosBundleId: 'com.autohub.app.autohub',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'your-macos-api-key',
-    appId: 'your-macos-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosBundleId: 'com.autohub.app',
+    apiKey: 'AIzaSyC-BsVnG8o8QTywppfwlotX67Mut4ipMSw',
+    appId: '1:781860708104:ios:8323bdc10d8a52710f56bd',
+    messagingSenderId: '781860708104',
+    projectId: 'autohub-819f4',
+    storageBucket: 'autohub-819f4.firebasestorage.app',
+    iosBundleId: 'com.autohub.app.autohub',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'your-windows-api-key',
-    appId: 'your-windows-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyAcmbtToZDVO3Ce7ueeEJi85tYV2jVC8EQ',
+    appId: '1:781860708104:web:d1de8d6fd3644e890f56bd',
+    messagingSenderId: '781860708104',
+    projectId: 'autohub-819f4',
+    authDomain: 'autohub-819f4.firebaseapp.com',
+    storageBucket: 'autohub-819f4.firebasestorage.app',
   );
 }
