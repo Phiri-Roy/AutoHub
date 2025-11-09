@@ -20,9 +20,9 @@ class StoryCircle extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 70,
-        height: 70,
         margin: const EdgeInsets.only(right: 12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Story circle with gradient border
             Container(

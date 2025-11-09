@@ -19,14 +19,17 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return authService.authStateChanges;
 });
 
-// Current user provider - now reacts to auth state changes
+// Current user provider - now reacts to auth state changes and streams user data
 final currentUserProvider = StreamProvider<UserModel?>((ref) {
   final authService = ref.watch(authServiceProvider);
-  return authService.authStateChanges.asyncMap((user) async {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  
+  return authService.authStateChanges.asyncExpand((user) {
     if (user != null) {
-      return await authService.getCurrentUserData();
+      // Stream the user document for real-time updates
+      return firestoreService.getUserStream(user.uid);
     }
-    return null;
+    return Stream.value(null);
   });
 });
 
@@ -149,13 +152,13 @@ final leaderboardProvider = StreamProvider<List<UserModel>>((ref) {
   );
 });
 
-// User by ID provider
-final userByIdProvider = FutureProvider.family<UserModel?, String>((
+// User by ID provider - streams user data for real-time updates
+final userByIdProvider = StreamProvider.family<UserModel?, String>((
   ref,
   userId,
-) async {
+) {
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return await firestoreService.getUser(userId);
+  return firestoreService.getUserStream(userId);
 });
 
 // Activity providers by user

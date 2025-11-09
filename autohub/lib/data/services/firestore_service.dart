@@ -33,6 +33,19 @@ class FirestoreService {
     return null;
   }
 
+  Stream<UserModel?> getUserStream(String userId) {
+    return _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .snapshots()
+        .map((doc) {
+      if (doc.exists) {
+        return UserModel.fromFirestore(doc);
+      }
+      return null;
+    });
+  }
+
   Future<void> updateUser(UserModel user) async {
     await _firestore
         .collection(AppConstants.usersCollection)
@@ -557,17 +570,41 @@ class FirestoreService {
               .map((doc) => doc.data()['followingId'] as String)
               .toList();
 
-          if (followingIds.isEmpty) return <PostModel>[];
+          // Include the current user's own posts in the feed
+          final userIdsToFetch = <String>{userId};
+          userIdsToFetch.addAll(followingIds);
 
-          final posts = await _firestore
-              .collection(AppConstants.postsCollection)
-              .where('postedBy', whereIn: followingIds)
-              .where('isActive', isEqualTo: true)
-              .orderBy('timestamp', descending: true)
-              .limit(50)
-              .get();
+          // Firestore whereIn has a limit of 10 items
+          // Split into batches if needed
+          final List<PostModel> allPosts = [];
+          const int batchSize = 10;
+          final userIdsList = userIdsToFetch.toList();
 
-          return posts.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
+          if (userIdsList.isNotEmpty) {
+            for (int i = 0; i < userIdsList.length; i += batchSize) {
+              final batch = userIdsList.skip(i).take(batchSize).toList();
+              
+              final posts = await _firestore
+                  .collection(AppConstants.postsCollection)
+                  .where('postedBy', whereIn: batch)
+                  .where('isActive', isEqualTo: true)
+                  .orderBy('timestamp', descending: true)
+                  .limit(50)
+                  .get();
+
+              allPosts.addAll(
+                posts.docs.map((doc) => PostModel.fromFirestore(doc)).toList(),
+              );
+            }
+
+            // Sort all posts by timestamp descending and limit to 50 most recent
+            allPosts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+            return allPosts.take(50).toList();
+          } else {
+            // If user has no posts and isn't following anyone, return empty list
+            // (Feed will show "No posts yet" message)
+            return <PostModel>[];
+          }
         });
   }
 

@@ -136,7 +136,15 @@ class _UserTileState extends ConsumerState<_UserTile> {
           widget.currentUserId,
           widget.user.id,
         );
-        setState(() => _isFollowing = false);
+        if (mounted) {
+          setState(() => _isFollowing = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unfollowed'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
         await firestoreService.followUser(widget.currentUserId, widget.user.id);
 
@@ -148,7 +156,15 @@ class _UserTileState extends ConsumerState<_UserTile> {
           currentUser.profilePhotoUrl,
         );
 
-        setState(() => _isFollowing = true);
+        if (mounted) {
+          setState(() => _isFollowing = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Following'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

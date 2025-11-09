@@ -38,9 +38,10 @@ class _StoriesSectionState extends ConsumerState<StoriesSection> {
             .toList();
 
         return Container(
-          height: 100,
-          padding: const EdgeInsets.symmetric(
-            vertical: AppConstants.defaultPadding,
+          height: 115,
+          padding: const EdgeInsets.only(
+            top: AppConstants.defaultPadding,
+            bottom: 12,
           ),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -62,9 +63,10 @@ class _StoriesSectionState extends ConsumerState<StoriesSection> {
         );
       },
       loading: () => Container(
-        height: 100,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppConstants.defaultPadding,
+        height: 115,
+        padding: const EdgeInsets.only(
+          top: AppConstants.defaultPadding,
+          bottom: 12,
         ),
         child: const Center(child: CircularProgressIndicator()),
       ),

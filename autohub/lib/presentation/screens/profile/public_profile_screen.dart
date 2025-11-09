@@ -50,10 +50,35 @@ class _PublicProfileScreenState extends ConsumerState<PublicProfileScreen>
       final firestore = ref.read(firestoreServiceProvider);
       if (_isFollowing) {
         await firestore.unfollowUser(currentUser.id, widget.userId);
-        setState(() => _isFollowing = false);
+        if (mounted) {
+          setState(() => _isFollowing = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unfollowed'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
         await firestore.followUser(currentUser.id, widget.userId);
-        setState(() => _isFollowing = true);
+        
+        // Create follow notification
+        await firestore.createFollowNotification(
+          currentUser.id,
+          widget.userId,
+          currentUser.username,
+          currentUser.profilePhotoUrl,
+        );
+        
+        if (mounted) {
+          setState(() => _isFollowing = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Following'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

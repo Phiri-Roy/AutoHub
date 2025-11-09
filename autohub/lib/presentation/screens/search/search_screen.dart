@@ -511,17 +511,32 @@ class _FollowButtonState extends ConsumerState<_FollowButton> {
         await fs.unfollowUser(me.id, widget.userId);
         if (mounted) {
           setState(() => _isFollowing = false);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Unfollowed')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unfollowed'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
       } else {
         await fs.followUser(me.id, widget.userId);
+        
+        // Create follow notification
+        await fs.createFollowNotification(
+          me.id,
+          widget.userId,
+          me.username,
+          me.profilePhotoUrl,
+        );
+        
         if (mounted) {
           setState(() => _isFollowing = true);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Following')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Following'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
       }
     } catch (e) {
