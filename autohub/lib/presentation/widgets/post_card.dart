@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/post_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../../providers/app_providers.dart';
 import 'common/share_button.dart';
 
@@ -13,9 +14,35 @@ class PostCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the post stream for real-time updates
+    final postAsync = ref.watch(postByIdProvider(post.id));
     final currentUser = ref.watch(currentUserProvider);
-    final postAuthor = ref.watch(userByIdProvider(post.postedBy));
+    
+    return postAsync.when(
+      data: (streamedPost) {
+        final displayPost = streamedPost ?? post;
+        final postAuthor = ref.watch(userByIdProvider(displayPost.postedBy));
+        
+        return _buildCard(context, ref, displayPost, currentUser, postAuthor);
+      },
+      loading: () {
+        final postAuthor = ref.watch(userByIdProvider(post.postedBy));
+        return _buildCard(context, ref, post, currentUser, postAuthor);
+      },
+      error: (_, __) {
+        final postAuthor = ref.watch(userByIdProvider(post.postedBy));
+        return _buildCard(context, ref, post, currentUser, postAuthor);
+      },
+    );
+  }
 
+  Widget _buildCard(
+    BuildContext context,
+    WidgetRef ref,
+    PostModel displayPost,
+    AsyncValue<UserModel?> currentUser,
+    AsyncValue<UserModel?> postAuthor,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -57,7 +84,7 @@ class PostCard extends ConsumerWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        DateFormat('MMM d, y • h:mm a').format(post.timestamp),
+                        DateFormat('MMM d, y • h:mm a').format(displayPost.timestamp),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -69,22 +96,22 @@ class PostCard extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Post content
-            if (post.content.isNotEmpty) ...[
-              Text(post.content, style: Theme.of(context).textTheme.bodyLarge),
+            if (displayPost.content.isNotEmpty) ...[
+              Text(displayPost.content, style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 12),
             ],
 
             // Post images
-            if (post.imageUrls.isNotEmpty) ...[
+            if (displayPost.imageUrls.isNotEmpty) ...[
               SizedBox(
                 height: 200,
                 child: PageView.builder(
-                  itemCount: post.imageUrls.length,
+                  itemCount: displayPost.imageUrls.length,
                   itemBuilder: (context, index) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
-                        imageUrl: post.imageUrls[index],
+                        imageUrl: displayPost.imageUrls[index],
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[300],
@@ -110,10 +137,10 @@ class PostCard extends ConsumerWidget {
                 // Like button
                 IconButton(
                   icon: Icon(
-                    post.hasLiked(currentUser.value?.id ?? '')
+                    displayPost.hasLiked(currentUser.value?.id ?? '')
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    color: post.hasLiked(currentUser.value?.id ?? '')
+                    color: displayPost.hasLiked(currentUser.value?.id ?? '')
                         ? Colors.red
                         : null,
                   ),
@@ -124,35 +151,35 @@ class PostCard extends ConsumerWidget {
                       );
                       final currentUserData = currentUser.value!;
 
-                      if (post.hasLiked(currentUserData.id)) {
+                      if (displayPost.hasLiked(currentUserData.id)) {
                         await firestoreService.unlikePost(
-                          post.id,
+                          displayPost.id,
                           currentUserData.id,
                         );
                       } else {
                         await firestoreService.likePost(
-                          post.id,
+                          displayPost.id,
                           currentUserData.id,
                         );
 
                         // Create like notification (only if not liking own post)
-                        if (post.postedBy != currentUserData.id) {
+                        if (displayPost.postedBy != currentUserData.id) {
                           await firestoreService.createLikeNotification(
                             currentUserData.id,
-                            post.postedBy,
+                            displayPost.postedBy,
                             currentUserData.username,
                             currentUserData.profilePhotoUrl,
-                            post.id,
-                            post.content.isNotEmpty
-                                ? post.content
-                                : 'Shared ${post.imageUrls.length} image(s)',
+                            displayPost.id,
+                            displayPost.content.isNotEmpty
+                                ? displayPost.content
+                                : 'Shared ${displayPost.imageUrls.length} image(s)',
                           );
                         }
                       }
                     }
                   },
                 ),
-                Text('${post.likeCount}'),
+                Text('${displayPost.likeCount}'),
 
                 const SizedBox(width: 16),
 
@@ -168,16 +195,16 @@ class PostCard extends ConsumerWidget {
                     );
                   },
                 ),
-                Text('${post.commentCount}'),
+                Text('${displayPost.commentCount}'),
 
                 const Spacer(),
 
                 // Share button
                 ShareButton(
                   shareType: ShareType.post,
-                  content: post.content,
-                  imageUrl: post.imageUrls.isNotEmpty
-                      ? post.imageUrls.first
+                  content: displayPost.content,
+                  imageUrl: displayPost.imageUrls.isNotEmpty
+                      ? displayPost.imageUrls.first
                       : null,
                   authorName: postAuthor.when(
                     data: (user) => user?.username,

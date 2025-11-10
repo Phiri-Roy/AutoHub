@@ -13,12 +13,6 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _markAllAsRead();
-  }
-
   Future<void> _markAllAsRead() async {
     final currentUser = ref.read(currentUserProvider).value;
     if (currentUser != null) {
@@ -61,21 +55,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             );
           }
 
-          return StreamBuilder<List<NotificationModel>>(
-            stream: ref
-                .read(firestoreServiceProvider)
-                .getNotifications(currentUser.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          // Use the notifications provider for real-time updates
+          final notificationsAsync = ref.watch(notificationsProvider(currentUser.id));
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
-
-              final notifications = snapshot.data ?? [];
-
+          return notificationsAsync.when(
+            data: (notifications) {
               if (notifications.isEmpty) {
                 return const Center(
                   child: Column(
@@ -105,6 +89,22 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 },
               );
             },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error: ${error.toString()}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref.invalidate(notificationsProvider(currentUser.id)),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -135,9 +135,15 @@ class _NotificationTile extends ConsumerWidget {
 
   Future<void> _markAsRead(WidgetRef ref) async {
     if (!notification.isRead) {
-      await ref
-          .read(firestoreServiceProvider)
-          .markNotificationAsRead(notification.id);
+      try {
+        await ref
+            .read(firestoreServiceProvider)
+            .markNotificationAsRead(notification.id);
+        // The stream will automatically update the UI when the notification is marked as read
+      } catch (e) {
+        // Handle error silently or show a snackbar if needed
+        debugPrint('Error marking notification as read: $e');
+      }
     }
   }
 

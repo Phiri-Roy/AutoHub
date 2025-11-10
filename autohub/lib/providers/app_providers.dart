@@ -6,6 +6,7 @@ import '../data/models/user_model.dart';
 import '../data/models/event_model.dart';
 import '../data/models/post_model.dart';
 import '../data/models/event_submission_model.dart';
+import '../data/models/notification_model.dart';
 
 // Service providers
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
@@ -175,6 +176,33 @@ final userAttendedEventsProvider =
       final firestoreService = ref.watch(firestoreServiceProvider);
       return firestoreService.getEventsAttendedByUser(userId);
     });
+
+// Notifications provider - streams notifications for real-time updates
+final notificationsProvider = StreamProvider.family<List<NotificationModel>, String>((
+  ref,
+  userId,
+) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getNotifications(userId);
+});
+
+// Event by ID provider - streams event data for real-time updates
+final eventByIdProvider = StreamProvider.family<EventModel?, String>((
+  ref,
+  eventId,
+) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getEventStream(eventId);
+});
+
+// Post by ID provider - streams post data for real-time updates
+final postByIdProvider = StreamProvider.family<PostModel?, String>((
+  ref,
+  postId,
+) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getPostStream(postId);
+});
 
 // Selected event provider
 final selectedEventProvider = StateProvider<EventModel?>((ref) => null);

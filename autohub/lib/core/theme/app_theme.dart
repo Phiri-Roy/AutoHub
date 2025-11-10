@@ -2,42 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Social Media Colors
-  static const Color accentBlue = Color(0xFF1DA1F2); // Twitter blue
-  static const Color primaryColor = Color(0xFF1E3A8A); // Deep blue
-  static const Color secondaryColor = Color(0xFFEF4444); // Red accent
+  // Redline Palette - Performance & Passion
+  static const Color adrenalineRed = Color(0xFFD32F2F); // Primary - Main buttons, active tabs, like icons
+  static const Color carbonFiber = Color(0xFF212121); // Secondary - App bars, bottom nav, headers
+  static const Color chromeSilver = Color(0xFFB0BEC5); // Accent - Icon outlines, secondary text, dividers
+  static const Color asphaltGrey = Color(0xFF121212); // Background - Main background (Dark mode)
+  static const Color matteGunmetal = Color(0xFF2C2C2C); // Surface - Cards, modal backgrounds
+
+  // Legacy colors for compatibility
+  static const Color accentBlue = adrenalineRed; // Using red as primary now
+  static const Color primaryColor = adrenalineRed;
+  static const Color secondaryColor = carbonFiber;
   static const Color errorColor = Color(0xFFDC2626);
   static const Color successColor = Color(0xFF10B981);
   static const Color warningColor = Color(0xFFF59E0B);
 
-  // Light Mode Colors
-  static const Color lightBackground = Color(0xFFFFFFFF); // #FFFFFF
+  // Light Mode Colors (using Redline palette with lighter variants)
+  static const Color lightBackground = Color(0xFFFAFAFA); // Light variant of asphalt
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightTextPrimary = Color(0xFF111827); // #111827
-  static const Color lightTextSecondary = Color(0xFF6B7280);
-  static const Color lightTextLight = Color(0xFF9CA3AF);
-  static const Color lightBorder = Color(0xFFE5E7EB);
+  static const Color lightTextPrimary = Color(0xFF212121); // Carbon Fiber for text
+  static const Color lightTextSecondary = Color(0xFF757575); // Darker chrome silver
+  static const Color lightTextLight = Color(0xFFB0BEC5); // Chrome Silver
+  static const Color lightBorder = Color(0xFFE0E0E0);
 
-  // Dark Mode Colors
-  static const Color darkBackground = Color(0xFF0F1419); // #0F1419
-  static const Color darkSurface = Color(0xFF161B22);
-  static const Color darkTextPrimary = Color(0xFFE5E7EB); // #E5E7EB
-  static const Color darkTextSecondary = Color(0xFF9CA3AF);
-  static const Color darkTextLight = Color(0xFF6B7280);
-  static const Color darkBorder = Color(0xFF30363D);
+  // Dark Mode Colors - Redline Palette
+  static const Color darkBackground = asphaltGrey; // #121212
+  static const Color darkSurface = matteGunmetal; // #2C2C2C
+  static const Color darkTextPrimary = Color(0xFFE5E7EB); // Light text for contrast
+  static const Color darkTextSecondary = chromeSilver; // #B0BEC5
+  static const Color darkTextLight = Color(0xFF90A4AE); // Slightly darker chrome silver
+  static const Color darkBorder = Color(0xFF424242);
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: accentBlue,
+        seedColor: adrenalineRed,
         brightness: Brightness.light,
-        primary: accentBlue,
-        secondary: secondaryColor,
+        primary: adrenalineRed,
+        secondary: carbonFiber,
         surface: lightSurface,
         background: lightBackground,
         error: errorColor,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: lightTextPrimary,
+        onBackground: lightTextPrimary,
       ),
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.inter(
@@ -102,19 +113,19 @@ class AppTheme {
         ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: lightSurface,
-        foregroundColor: lightTextPrimary,
+        backgroundColor: carbonFiber, // Carbon Fiber for app bars
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: lightTextPrimary,
+          color: Colors.white,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accentBlue,
+          backgroundColor: adrenalineRed, // Adrenaline Red for main buttons
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
@@ -128,8 +139,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: accentBlue,
-          side: const BorderSide(color: accentBlue),
+          foregroundColor: adrenalineRed,
+          side: const BorderSide(color: adrenalineRed),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -142,7 +153,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: accentBlue,
+          foregroundColor: adrenalineRed,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
@@ -163,7 +174,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
+          borderSide: const BorderSide(color: adrenalineRed, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -182,9 +193,9 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: lightSurface,
-        selectedItemColor: accentBlue,
-        unselectedItemColor: lightTextLight,
+        backgroundColor: carbonFiber, // Carbon Fiber for bottom nav
+        selectedItemColor: adrenalineRed, // Adrenaline Red for active icons
+        unselectedItemColor: chromeSilver, // Chrome Silver for inactive icons
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
@@ -196,13 +207,17 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: accentBlue,
+        seedColor: adrenalineRed,
         brightness: Brightness.dark,
-        primary: accentBlue,
-        secondary: secondaryColor,
-        surface: darkSurface,
-        background: darkBackground,
+        primary: adrenalineRed, // Adrenaline Red
+        secondary: carbonFiber, // Carbon Fiber
+        surface: matteGunmetal, // Matte Gunmetal for cards
+        background: asphaltGrey, // Asphalt Grey for background
         error: errorColor,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: darkTextPrimary,
+        onBackground: darkTextPrimary,
       ),
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.inter(
@@ -267,19 +282,19 @@ class AppTheme {
         ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: darkSurface,
-        foregroundColor: darkTextPrimary,
+        backgroundColor: carbonFiber, // Carbon Fiber for app bars
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: darkTextPrimary,
+          color: Colors.white,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accentBlue,
+          backgroundColor: adrenalineRed, // Adrenaline Red for main buttons
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
@@ -293,8 +308,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: accentBlue,
-          side: const BorderSide(color: accentBlue),
+          foregroundColor: adrenalineRed,
+          side: const BorderSide(color: adrenalineRed),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -307,7 +322,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: accentBlue,
+          foregroundColor: adrenalineRed,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
@@ -328,7 +343,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
+          borderSide: const BorderSide(color: adrenalineRed, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -341,15 +356,15 @@ class AppTheme {
         hintStyle: GoogleFonts.inter(color: darkTextLight, fontSize: 14),
       ),
       cardTheme: CardThemeData(
-        color: darkSurface,
+        color: matteGunmetal, // Matte Gunmetal for cards
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: darkSurface,
-        selectedItemColor: accentBlue,
-        unselectedItemColor: darkTextLight,
+        backgroundColor: carbonFiber, // Carbon Fiber for bottom nav
+        selectedItemColor: adrenalineRed, // Adrenaline Red for active icons
+        unselectedItemColor: chromeSilver, // Chrome Silver for inactive icons
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),

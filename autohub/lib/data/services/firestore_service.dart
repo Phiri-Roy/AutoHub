@@ -84,6 +84,19 @@ class FirestoreService {
     return null;
   }
 
+  Stream<EventModel?> getEventStream(String eventId) {
+    return _firestore
+        .collection(AppConstants.eventsCollection)
+        .doc(eventId)
+        .snapshots()
+        .map((doc) {
+      if (doc.exists) {
+        return EventModel.fromFirestore(doc);
+      }
+      return null;
+    });
+  }
+
   Future<void> updateEvent(EventModel event) async {
     await _firestore
         .collection(AppConstants.eventsCollection)
@@ -213,6 +226,19 @@ class FirestoreService {
       return PostModel.fromFirestore(doc);
     }
     return null;
+  }
+
+  Stream<PostModel?> getPostStream(String postId) {
+    return _firestore
+        .collection(AppConstants.postsCollection)
+        .doc(postId)
+        .snapshots()
+        .map((doc) {
+      if (doc.exists) {
+        return PostModel.fromFirestore(doc);
+      }
+      return null;
+    });
   }
 
   Stream<List<PostModel>> getPostsStream() {
@@ -682,6 +708,11 @@ class FirestoreService {
     String followerName,
     String? followerProfilePhotoUrl,
   ) async {
+    // Don't create notification if user is following themselves
+    if (followerId == followingId) {
+      return;
+    }
+    
     final notification = NotificationModel(
       id: '',
       recipientId: followingId,
@@ -704,6 +735,11 @@ class FirestoreService {
     String postId,
     String? postContent,
   ) async {
+    // Don't create notification if user is liking their own post
+    if (likerId == postOwnerId) {
+      return;
+    }
+    
     final notification = NotificationModel(
       id: '',
       recipientId: postOwnerId,

@@ -35,20 +35,37 @@ class StoryCircle extends StatelessWidget {
                         colors: [Colors.grey.shade400, Colors.grey.shade300],
                       )
                     : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                         colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.secondary,
-                          Colors.orange,
-                          Colors.pink,
+                          const Color(0xFFD32F2F), // Adrenaline Red
+                          const Color(0xFFFF5252), // Lighter red for contrast
+                          const Color(0xFFFF6B6B), // Bright red-pink
+                          const Color(0xFFFF8A80), // Light red-orange
                         ],
+                        stops: const [0.0, 0.3, 0.7, 1.0],
                       ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: isViewed
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFFD32F2F).withOpacity(0.5), // Red glow
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Container(
                 margin: const EdgeInsets.all(2),
